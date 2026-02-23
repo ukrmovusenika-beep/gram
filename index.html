@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Чарівні Хмаринки</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+
+<style>
+body{
+  font-family:'Nunito',sans-serif;
+  background:linear-gradient(to bottom,#FFF5EE,#FFE4E1);
+}
+
+.word-card{
+  cursor:grab;
+  transition:0.2s;
+}
+.word-card:hover{
+  transform:scale(1.05);
+}
+.word-card.dragging{
+  opacity:.7;
+  transform:scale(1.1);
+}
+
+.category-zone{
+  transition:.3s;
+}
+.category-zone.drag-over{
+  transform:scale(1.03);
+  box-shadow:0 0 20px rgba(255,183,150,.5);
+}
+
+.star{
+  animation:pop .4s ease;
+}
+@keyframes pop{
+  0%{transform:scale(0)}
+  100%{transform:scale(1)}
+}
+</style>
+</head>
+
+<body class="min-h-screen p-6">
+
+<div id="start" class="text-center">
+  <h1 class="text-4xl font-extrabold mb-4">☁️ Чарівні Хмаринки</h1>
+  <p class="mb-6">Перетягни слово до правильної хмаринки.</p>
+  <button onclick="startGame()" 
+  class="bg-orange-300 hover:bg-orange-400 px-8 py-3 rounded-2xl font-bold shadow-lg transition">
+  Почати гру
+  </button>
+</div>
+
+<div id="game" class="hidden">
+  
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-2xl font-bold">Знайди правильний звук</h2>
+    <div id="stars"></div>
+  </div>
+
+  <div class="grid md:grid-cols-2 gap-6 mb-8">
+    <div class="category-zone border-4 border-dashed border-orange-300 p-6 rounded-3xl"
+         data-category="0">
+      <h3 class="text-xl font-bold mb-4">Звук [Р]</h3>
+      <div class="sorted flex flex-wrap gap-2"></div>
+    </div>
+
+    <div class="category-zone border-4 border-dashed border-green-300 p-6 rounded-3xl"
+         data-category="1">
+      <h3 class="text-xl font-bold mb-4">Звук [Л]</h3>
+      <div class="sorted flex flex-wrap gap-2"></div>
+    </div>
+  </div>
+
+  <div id="words" class="flex flex-wrap gap-3 justify-center"></div>
+
+</div>
+
+<script>
+
+const wordsData = [
+ {text:"🚀 Ракета",cat:0},
+ {text:"🐟 Риба",cat:0},
+ {text:"🌹 Троянда",cat:0},
+ {text:"🦊 Лисиця",cat:1},
+ {text:"🍋 Лимон",cat:1},
+ {text:"🧻 Рушник",cat:0}
+];
+
+let dragged=null;
+let stars=0;
+
+function startGame(){
+ document.getElementById("start").classList.add("hidden");
+ document.getElementById("game").classList.remove("hidden");
+ renderWords();
+}
+
+function renderWords(){
+ const container=document.getElementById("words");
+ container.innerHTML="";
+ wordsData.sort(()=>Math.random()-0.5);
+ wordsData.forEach((w,i)=>{
+   const div=document.createElement("div");
+   div.className="word-card bg-white px-6 py-3 rounded-2xl shadow";
+   div.textContent=w.text;
+   div.draggable=true;
+   div.dataset.cat=w.cat;
+   div.addEventListener("dragstart",e=>{
+     dragged=e.target;
+     e.target.classList.add("dragging");
+   });
+   div.addEventListener("dragend",e=>{
+     e.target.classList.remove("dragging");
+   });
+   container.appendChild(div);
+ });
+}
+
+document.querySelectorAll(".category-zone").forEach(zone=>{
+ zone.addEventListener("dragover",e=>{
+   e.preventDefault();
+   zone.classList.add("drag-over");
+ });
+ zone.addEventListener("dragleave",()=>{
+   zone.classList.remove("drag-over");
+ });
+ zone.addEventListener("drop",()=>{
+   zone.classList.remove("drag-over");
+   if(!dragged)return;
+   if(dragged.dataset.cat===zone.dataset.category){
+     zone.querySelector(".sorted").appendChild(dragged);
+     addStar();
+   }else{
+     alert("Спробуй ще раз 😊");
+   }
+ });
+});
+
+function addStar(){
+ stars++;
+ const container=document.getElementById("stars");
+ const s=document.createElement("span");
+ s.className="star text-2xl";
+ s.textContent="⭐";
+ container.appendChild(s);
+}
+
+</script>
+
+</body>
+</html>
